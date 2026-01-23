@@ -690,6 +690,7 @@ element_dealloc(PyObject *op)
 
     /* bpo-31095: UnTrack is needed before calling any callbacks */
     PyObject_GC_UnTrack(self);
+    Py_TRASHCAN_BEGIN(self, element_dealloc)
 
     FT_CLEAR_WEAKREFS(op, self->weakreflist);
 
@@ -699,6 +700,7 @@ element_dealloc(PyObject *op)
 
     tp->tp_free(self);
     Py_DECREF(tp);
+    Py_TRASHCAN_END
 }
 
 /* -------------------------------------------------------------------- */

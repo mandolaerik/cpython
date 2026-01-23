@@ -167,8 +167,13 @@ static void
 meth_dealloc(PyObject *self)
 {
     PyCFunctionObject *m = _PyCFunctionObject_CAST(self);
+    // The Py_TRASHCAN mechanism requires that we be able to
+    // call PyObject_GC_UnTrack twice on an object.
     PyObject_GC_UnTrack(m);
-    FT_CLEAR_WEAKREFS(self, m->m_weakreflist);
+    Py_TRASHCAN_BEGIN(m, meth_dealloc);
+    if (m->m_weakreflist != NULL) {
+        PyObject_ClearWeakRefs((PyObject*) m);
+    }
     // We need to access ml_flags here rather than later.
     // `m->m_ml` might have the same lifetime
     // as `m_self` when it's dynamically allocated.
@@ -186,6 +191,7 @@ meth_dealloc(PyObject *self)
         assert(Py_IS_TYPE(self, &PyCFunction_Type));
         _Py_FREELIST_FREE(pycfunctionobject, m, PyObject_GC_Del);
     }
+    Py_TRASHCAN_END;
 }
 
 static PyObject *

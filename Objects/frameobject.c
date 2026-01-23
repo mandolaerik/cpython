@@ -1919,6 +1919,7 @@ frame_dealloc(PyObject *op)
         _PyObject_GC_UNTRACK(f);
     }
 
+    Py_TRASHCAN_BEGIN(f, frame_dealloc);
     /* GH-106092: If f->f_frame was on the stack and we reached the maximum
      * nesting depth for deallocations, the trashcan may have delayed this
      * deallocation until after f->f_frame is freed. Avoid dereferencing
@@ -1943,6 +1944,7 @@ frame_dealloc(PyObject *op)
     Py_CLEAR(f->f_locals_cache);
     Py_CLEAR(f->f_overwritten_fast_locals);
     PyObject_GC_Del(f);
+    Py_TRASHCAN_END;
 }
 
 static int

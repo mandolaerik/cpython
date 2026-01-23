@@ -1311,9 +1311,11 @@ wrapper_dealloc(PyObject *self)
 {
     wrapperobject *wp = (wrapperobject *)self;
     PyObject_GC_UnTrack(wp);
+    Py_TRASHCAN_BEGIN(wp, wrapper_dealloc)
     Py_XDECREF(wp->descr);
     Py_XDECREF(wp->self);
     PyObject_GC_Del(wp);
+    Py_TRASHCAN_END
 }
 
 static PyObject *

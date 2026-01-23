@@ -546,7 +546,9 @@ set_dealloc(PyObject *self)
 
     /* bpo-31095: UnTrack is needed before calling any callbacks */
     PyObject_GC_UnTrack(so);
-    FT_CLEAR_WEAKREFS(self, so->weakreflist);
+    Py_TRASHCAN_BEGIN(so, set_dealloc)
+    if (so->weakreflist != NULL)
+        PyObject_ClearWeakRefs((PyObject *) so);
 
     for (entry = so->table; used > 0; entry++) {
         if (entry->key && entry->key != dummy) {
@@ -557,6 +559,7 @@ set_dealloc(PyObject *self)
     if (so->table != so->smalltable)
         PyMem_Free(so->table);
     Py_TYPE(so)->tp_free(so);
+    Py_TRASHCAN_END
 }
 
 static PyObject *

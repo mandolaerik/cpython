@@ -860,10 +860,6 @@ error:
 static PyStatus
 pycore_interp_init(PyThreadState *tstate)
 {
-    _PyThreadStateImpl *_tstate = (_PyThreadStateImpl *)tstate;
-    if (_tstate->c_stack_hard_limit == 0) {
-        _Py_InitializeRecursionLimits(tstate);
-    }
     PyInterpreterState *interp = tstate->interp;
     PyStatus status;
     PyObject *sysmod = NULL;
